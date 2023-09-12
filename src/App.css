@@ -130,3 +130,16 @@ section {
   font-size: 0.75rem;
   font-weight: 600;
 }
+
+.question-container > .answers-container > .answers-btn--correct {
+  background-color:#94D7A2;
+}
+
+.question-container > .answers-container > .answers-btn--incorrect {
+  background-color: #F8BCBC;
+  opacity: 0.5;
+}
+
+.question-container > .answers-container > .answers-btn--dimmed {
+  opacity: 0.5;
+}

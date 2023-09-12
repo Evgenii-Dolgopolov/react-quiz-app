@@ -119,6 +119,8 @@ function App() {
       answers={questionData.answers}
       selectedAnswerId={questionData.selectedAnswerId}
       selectAnswer={answerId => selectAnswer(questionData.id, answerId)}
+      endGame={endGame}
+      correctAnswerId={questionData.correctAnswerId}
     />
   ))
 
