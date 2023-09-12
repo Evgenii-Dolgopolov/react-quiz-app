@@ -29,10 +29,21 @@ function App() {
             ...questionData.incorrect_answers,
           ]
 
-          const allAnswersObj = allAnswersArr.map(answer => ({
-            id: nanoid(),
-            text: answer,
-          }))
+          let correctAnswerId = null
+
+          const allAnswersObj = allAnswersArr.map(answer => {
+            const answerId = nanoid()
+
+            if (answer === questionData.correct_answer) {
+              correctAnswerId = answerId
+            }
+
+            return {
+              id: answerId,
+              text: answer,
+              isSelected: false,
+            }
+          })
 
           const shuffledAnswersObj = shuffle(allAnswersObj)
 
@@ -40,6 +51,7 @@ function App() {
             ...questionData,
             answers: shuffledAnswersObj,
             selectedAnswerId: null,
+            correctAnswerId: correctAnswerId,
           }
         })
 
@@ -74,15 +86,25 @@ function App() {
     })
   }
 
-  function checkAnswers(currentAnswer) {
+  function checkAnswers() {
     setEndGame(true)
 
-    setQuestionsData(prevQuestionsData => prevQuestionsData.map(question => {
-      if (correct_answer === currentAnswer) {
-        console.log(currentAnswer)
-      }
-    }))
+    setQuestionsData(prevQuestionData => {
+      return prevQuestionData.map(question => {
+        if (question.selectedAnswerId === question.correctAnswerId) {
+          console.log("correct answers")
+        } else {
+          console.log("we also have some incorrect answers")
+        }
+
+        return question
+      })
+    })
   }
+
+  const correctAnswerCount = questionsData.filter(
+    question => question.selectedAnswerId === question.correctAnswerId
+  ).length
 
   function resetGame() {
     setEndGame(false)
@@ -108,7 +130,7 @@ function App() {
 
           {endGame ? (
             <div className="end-game-container">
-              <h4>You scored 3/5 correct answers</h4>
+              <h4>You scored {correctAnswerCount}/5 correct answers</h4>
               <button className="play-again-btn" onClick={resetGame}>
                 Play again
               </button>
@@ -118,7 +140,6 @@ function App() {
               Check answers
             </button>
           )}
-
         </div>
       ) : (
         <div className="starting-container">
