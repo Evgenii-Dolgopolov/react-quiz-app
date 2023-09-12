@@ -7,6 +7,8 @@ function App() {
   const [quiz, setQuiz] = useState(false)
   const [questionsData, setQuestionsData] = useState([])
   const [endGame, setEndGame] = useState(false)
+  const [answersChecked, setAnswersChecked] = useState(false)
+
   console.log(questionsData)
 
   function startQuiz() {
@@ -87,6 +89,16 @@ function App() {
   }
 
   function checkAnswers() {
+    const hasNullSelectedAnswerId = questionsData.some(
+      question => question.selectedAnswerId === null
+    )
+
+    // If there's an unanswered question, you can return from this function early.
+    if (hasNullSelectedAnswerId) {
+      alert("Please answer all questions before checking answers.")
+      return
+    }
+
     setEndGame(true)
 
     setQuestionsData(prevQuestionData => {
@@ -100,6 +112,8 @@ function App() {
         return question
       })
     })
+
+    setAnswersChecked(true)
   }
 
   const correctAnswerCount = questionsData.filter(
@@ -121,6 +135,7 @@ function App() {
       selectAnswer={answerId => selectAnswer(questionData.id, answerId)}
       endGame={endGame}
       correctAnswerId={questionData.correctAnswerId}
+      answersChecked={answersChecked}
     />
   ))
 

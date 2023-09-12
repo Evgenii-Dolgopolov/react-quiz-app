@@ -11,8 +11,16 @@ export default function Question(props) {
         } else {
           className += " answers-btn--incorrect"
         }
+      } else if (answer.id === props.correctAnswerId) {
+        className += " answers-btn--correct-highlight"
       } else {
-        className += " answers-btn--dimmed"
+        // Only add the dimmed class if the answer isn't the selected one and isn't the correct one
+        if (
+          answer.id !== props.correctAnswerId &&
+          answer.id !== props.selectedAnswerId
+        ) {
+          className += " answers-btn--dimmed"
+        }
       }
     } else if (props.selectedAnswerId === answer.id) {
       className += " answers-btn--selected"
@@ -22,7 +30,8 @@ export default function Question(props) {
       <button
         className={className}
         key={answer.id}
-        onClick={() => props.selectAnswer(answer.id)}>
+        onClick={() => props.selectAnswer(answer.id)}
+        disabled={props.answersChecked}>
         {decode(answer.text)}
       </button>
     )
