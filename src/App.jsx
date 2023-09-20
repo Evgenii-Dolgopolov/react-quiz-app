@@ -9,61 +9,54 @@ function App() {
   const [endGame, setEndGame] = useState(false)
   const [answersChecked, setAnswersChecked] = useState(false)
 
-  console.log(questionsData)
+  async function fetchQuestions() {
+    try {
+      const res = await fetch(
+        "https://opentdb.com/api.php?amount=5&type=multiple"
+      )
+      const data = await res.json()
+      const dataWithIds = data.results.map(item => ({
+        ...item,
+        id: nanoid(),
+      }))
 
-  function startQuiz() {
-    setQuiz(true)
-  }
+      const updatedQuestionsData = dataWithIds.map(questionData => {
+        const allAnswersArr = [
+          questionData.correct_answer,
+          ...questionData.incorrect_answers,
+        ]
 
-  useEffect(() => {
-    async function fetchData(url) {
-      try {
-        const res = await fetch(url)
-        const data = await res.json()
-        const dataWithIds = data.results.map(item => ({
-          ...item,
-          id: nanoid(),
-        }))
+        let correctAnswerId = null
 
-        const updatedQuestionsData = dataWithIds.map(questionData => {
-          const allAnswersArr = [
-            questionData.correct_answer,
-            ...questionData.incorrect_answers,
-          ]
+        const allAnswersObj = allAnswersArr.map(answer => {
+          const answerId = nanoid()
 
-          let correctAnswerId = null
-
-          const allAnswersObj = allAnswersArr.map(answer => {
-            const answerId = nanoid()
-
-            if (answer === questionData.correct_answer) {
-              correctAnswerId = answerId
-            }
-
-            return {
-              id: answerId,
-              text: answer,
-              isSelected: false,
-            }
-          })
-
-          const shuffledAnswersObj = shuffle(allAnswersObj)
+          if (answer === questionData.correct_answer) {
+            correctAnswerId = answerId
+          }
 
           return {
-            ...questionData,
-            answers: shuffledAnswersObj,
-            selectedAnswerId: null,
-            correctAnswerId: correctAnswerId,
+            id: answerId,
+            text: answer,
+            isSelected: false,
           }
         })
 
-        setQuestionsData(updatedQuestionsData)
-      } catch (error) {
-        console.error(error)
-      }
+        const shuffledAnswersObj = shuffle(allAnswersObj)
+
+        return {
+          ...questionData,
+          answers: shuffledAnswersObj,
+          selectedAnswerId: null,
+          correctAnswerId: correctAnswerId,
+        }
+      })
+
+      setQuestionsData(updatedQuestionsData)
+    } catch (error) {
+      console.error(error)
     }
-    fetchData("https://opentdb.com/api.php?amount=5&type=multiple")
-  }, [])
+  }
 
   function shuffle(array) {
     const clonedArray = [...array]
@@ -73,6 +66,14 @@ function App() {
     }
     return clonedArray
   }
+
+  function startQuiz() {
+    setQuiz(true)
+  }
+
+  useEffect(() => {
+    fetchQuestions()
+  }, [])
 
   function selectAnswer(questionId, answerId) {
     setQuestionsData(prevQuestionsData => {
@@ -93,7 +94,6 @@ function App() {
       question => question.selectedAnswerId === null
     )
 
-    // If there's an unanswered question, you can return from this function early.
     if (hasNullSelectedAnswerId) {
       alert("Please answer all questions before checking answers.")
       return
@@ -103,26 +103,27 @@ function App() {
 
     setQuestionsData(prevQuestionData => {
       return prevQuestionData.map(question => {
-        if (question.selectedAnswerId === question.correctAnswerId) {
-          console.log("correct answers")
-        } else {
-          console.log("we also have some incorrect answers")
+        const isCorrect = question.selectedAnswerId === question.correctAnswerId
+        return {
+          ...question,
+          isCorrect: isCorrect,
         }
-
-        return question
       })
     })
 
     setAnswersChecked(true)
   }
 
+  function resetGame() {
+    setEndGame(false)
+    setAnswersChecked(false)
+
+    fetchQuestions()
+  }
+
   const correctAnswerCount = questionsData.filter(
     question => question.selectedAnswerId === question.correctAnswerId
   ).length
-
-  function resetGame() {
-    setEndGame(false)
-  }
 
   const quizElements = questionsData.map(questionData => (
     <Question
@@ -136,6 +137,7 @@ function App() {
       endGame={endGame}
       correctAnswerId={questionData.correctAnswerId}
       answersChecked={answersChecked}
+      isCorrect={questionData.isCorrect}
     />
   ))
 

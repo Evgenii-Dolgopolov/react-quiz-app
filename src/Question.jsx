@@ -14,7 +14,6 @@ export default function Question(props) {
       } else if (answer.id === props.correctAnswerId) {
         className += " answers-btn--correct-highlight"
       } else {
-        // Only add the dimmed class if the answer isn't the selected one and isn't the correct one
         if (
           answer.id !== props.correctAnswerId &&
           answer.id !== props.selectedAnswerId
